@@ -19,20 +19,27 @@ def analyze_trend(df):
     df['MACD'] = df['Close'].ewm(span=12).mean() - df['Close'].ewm(span=26).mean()
     df['Signal'] = df['MACD'].ewm(span=9).mean()
 
+    df = df.dropna().copy()  # נפטר מכל השורות עם ערכים חסרים
     latest = df.iloc[-1]
+
+    sma5 = latest['SMA_5']
+    sma15 = latest['SMA_15']
+    macd = latest['MACD']
+    signal = latest['Signal']
+    rsi = latest['RSI']
+
     trend = "המתן"
     confidence = 50
 
-    if pd.notnull(latest['SMA_5']) and pd.notnull(latest['SMA_15']) and pd.notnull(latest['MACD']) and pd.notnull(latest['Signal']) and pd.notnull(latest['RSI']):
-        if latest['SMA_5'] > latest['SMA_15'] and latest['MACD'] > latest['Signal'] and latest['RSI'] < 70:
-            trend = "קנייה"
-            confidence = 80
-        elif latest['SMA_5'] < latest['SMA_15'] and latest['MACD'] < latest['Signal'] and latest['RSI'] > 30:
-            trend = "מכירה"
-            confidence = 80
+    if sma5 > sma15 and macd > signal and rsi < 70:
+        trend = "קנייה"
+        confidence = 80
+    elif sma5 < sma15 and macd < signal and rsi > 30:
+        trend = "מכירה"
+        confidence = 80
 
     return trend, confidence, df
-
+    
 def compute_rsi(series, period=14):
     delta = series.diff()
     gain = delta.where(delta > 0, 0)
