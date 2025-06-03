@@ -19,8 +19,12 @@ def analyze_trend(df):
     df['MACD'] = df['Close'].ewm(span=12).mean() - df['Close'].ewm(span=26).mean()
     df['Signal'] = df['MACD'].ewm(span=9).mean()
 
-    df = df.dropna().copy()  # נפטר מכל השורות עם ערכים חסרים
-    latest = df.iloc[[-1]]  # שמירה על DataFrame כדי לא לטעות עם Series
+    df = df.dropna().copy()
+
+    if df.empty:
+        return "אין מספיק נתונים", 0, df
+
+    latest = df.iloc[[-1]]
 
     sma5 = latest['SMA_5'].values[0]
     sma15 = latest['SMA_15'].values[0]
@@ -28,15 +32,29 @@ def analyze_trend(df):
     signal = latest['Signal'].values[0]
     rsi = latest['RSI'].values[0]
 
+    # דיאגנוסטיקה
+    st.write("⚙️ בדיקת ערכים אחרונים:")
+    st.write(f"SMA_5: {sma5} ({type(sma5)})")
+    st.write(f"SMA_15: {sma15} ({type(sma15)})")
+    st.write(f"MACD: {macd} ({type(macd)})")
+    st.write(f"Signal: {signal} ({type(signal)})")
+    st.write(f"RSI: {rsi} ({type(rsi)})")
+
     trend = "המתן"
     confidence = 50
 
-    if sma5 > sma15 and macd > signal and rsi < 70:
-        trend = "קנייה"
-        confidence = 80
-    elif sma5 < sma15 and macd < signal and rsi > 30:
-        trend = "מכירה"
-        confidence = 80
+    if isinstance(sma5, (int, float, np.float64)) and \
+       isinstance(sma15, (int, float, np.float64)) and \
+       isinstance(macd, (int, float, np.float64)) and \
+       isinstance(signal, (int, float, np.float64)) and \
+       isinstance(rsi, (int, float, np.float64)):
+
+        if sma5 > sma15 and macd > signal and rsi < 70:
+            trend = "קנייה"
+            confidence = 80
+        elif sma5 < sma15 and macd < signal and rsi > 30:
+            trend = "מכירה"
+            confidence = 80
 
     return trend, confidence, df
 
