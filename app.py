@@ -20,13 +20,13 @@ def analyze_trend(df):
     df['Signal'] = df['MACD'].ewm(span=9).mean()
 
     df = df.dropna().copy()  # נפטר מכל השורות עם ערכים חסרים
-    latest = df.iloc[-1]
+    latest = df.iloc[[-1]]  # שמירה על DataFrame כדי לא לטעות עם Series
 
-    sma5 = latest['SMA_5']
-    sma15 = latest['SMA_15']
-    macd = latest['MACD']
-    signal = latest['Signal']
-    rsi = latest['RSI']
+    sma5 = latest['SMA_5'].values[0]
+    sma15 = latest['SMA_15'].values[0]
+    macd = latest['MACD'].values[0]
+    signal = latest['Signal'].values[0]
+    rsi = latest['RSI'].values[0]
 
     trend = "המתן"
     confidence = 50
@@ -39,7 +39,7 @@ def analyze_trend(df):
         confidence = 80
 
     return trend, confidence, df
-    
+
 def compute_rsi(series, period=14):
     delta = series.diff()
     gain = delta.where(delta > 0, 0)
