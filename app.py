@@ -23,12 +23,13 @@ def analyze_trend(df):
     trend = "המתן"
     confidence = 50
 
-    if latest['SMA_5'] > latest['SMA_15'] and latest['MACD'] > latest['Signal'] and latest['RSI'] < 70:
-        trend = "קנייה"
-        confidence = 80
-    elif latest['SMA_5'] < latest['SMA_15'] and latest['MACD'] < latest['Signal'] and latest['RSI'] > 30:
-        trend = "מכירה"
-        confidence = 80
+    if pd.notnull(latest['SMA_5']) and pd.notnull(latest['SMA_15']) and pd.notnull(latest['MACD']) and pd.notnull(latest['Signal']) and pd.notnull(latest['RSI']):
+        if latest['SMA_5'] > latest['SMA_15'] and latest['MACD'] > latest['Signal'] and latest['RSI'] < 70:
+            trend = "קנייה"
+            confidence = 80
+        elif latest['SMA_5'] < latest['SMA_15'] and latest['MACD'] < latest['Signal'] and latest['RSI'] > 30:
+            trend = "מכירה"
+            confidence = 80
 
     return trend, confidence, df
 
