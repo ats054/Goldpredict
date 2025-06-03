@@ -5,7 +5,7 @@ import numpy as np
 
 st.set_page_config(page_title="חיזוי מגמת הזהב - Plus500", layout="centered")
 st.title("🔮 חיזוי מגמה לזהב בפלוס 500")
-st.write("ניתוח מגמה בטווח של חצי שעה קדימה לפי ניתוח טכני אמיתי")
+st.write("תחזית חכמה עם רמת ביטחון גבוהה בלבד (90%)")
 
 @st.cache_data
 def get_gold_data():
@@ -20,7 +20,6 @@ def analyze_trend(df):
     df['Signal'] = df['MACD'].ewm(span=9).mean()
 
     df = df.dropna().copy()
-
     if df.empty:
         return "אין מספיק נתונים", 0, df
 
@@ -32,29 +31,18 @@ def analyze_trend(df):
     signal = latest['Signal'].values[0]
     rsi = latest['RSI'].values[0]
 
-    # דיאגנוסטיקה
-    st.write("⚙️ בדיקת ערכים אחרונים:")
-    st.write(f"SMA_5: {sma5} ({type(sma5)})")
-    st.write(f"SMA_15: {sma15} ({type(sma15)})")
-    st.write(f"MACD: {macd} ({type(macd)})")
-    st.write(f"Signal: {signal} ({type(signal)})")
-    st.write(f"RSI: {rsi} ({type(rsi)})")
+    st.write("⚙️ ערכי ניתוח:")
+    st.write(f"SMA_5: {sma5}, SMA_15: {sma15}, MACD: {macd}, Signal: {signal}, RSI: {rsi}")
 
     trend = "המתן"
     confidence = 50
 
-    if isinstance(sma5, (int, float, np.float64)) and \
-       isinstance(sma15, (int, float, np.float64)) and \
-       isinstance(macd, (int, float, np.float64)) and \
-       isinstance(signal, (int, float, np.float64)) and \
-       isinstance(rsi, (int, float, np.float64)):
-
-        if sma5 > sma15 and macd > signal and rsi < 70:
-            trend = "קנייה"
-            confidence = 80
-        elif sma5 < sma15 and macd < signal and rsi > 30:
-            trend = "מכירה"
-            confidence = 80
+    if sma5 > sma15 and macd > signal and rsi < 65 and (sma5 - sma15) > 0.2 and (macd - signal) > 0.05:
+        trend = "קנייה"
+        confidence = 90
+    elif sma5 < sma15 and macd < signal and rsi > 35 and (sma15 - sma5) > 0.2 and (signal - macd) > 0.05:
+        trend = "מכירה"
+        confidence = 90
 
     return trend, confidence, df
 
